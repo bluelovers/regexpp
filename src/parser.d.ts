@@ -1,4 +1,5 @@
-import { Flags, RegExpLiteral, Pattern } from "./ast";
+import { Alternative, CapturingGroup, CharacterClass, Flags, Group, RegExpLiteral, LookaroundAssertion, Pattern } from "./ast";
+export declare type AppendableNode = Pattern | Alternative | Group | CapturingGroup | CharacterClass | LookaroundAssertion;
 export declare namespace RegExpParser {
     /**
      * The options for RegExpParser construction.

@@ -1,6 +1,6 @@
 {
   "name": "regexpp2",
-  "version": "1.1.2",
+  "version": "2.0.1",
   "description": "Regular expression parser for ECMAScript 2018.",
   "keywords": [
     "abstract",
@@ -29,45 +29,29 @@
   },
   "license": "MIT",
   "author": "Toru Nagashima (https://github.com/mysticatea)",
-  "main": "./src/index.js",
-  "types": [
-    "./index.d.ts"
-  ],
+  "main": "./index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "_build": "run-s build:*",
-    "_build:dts": "dts-bundle --name regexpp --main .temp/index.d.ts --out ../index.d.ts",
-    "_build:js": "rollup -c rollup-js.config.js",
-    "_build:mjs": "rollup -c rollup-mjs.config.js",
-    "_build:tsc": "tsc --module es2015 --target es2015",
-    "_clean": "rimraf .temp index.*",
-    "_lint": "eslint src test tools --ext .ts",
     "_postversion": "git push && git push --tags",
-    "_prebuild": "npm run -s clean",
-    "_pretest": "run-s build lint",
-    "_preversion": "npm test",
-    "_prewatch": "npm run -s clean",
-    "_test": "_mocha --require ts-node/register --reporter dot --timeout 10000 \"test/*.ts\"",
-    "_update:ids": "ts-node tools/update-unicode-ids.ts",
-    "_update:test": "ts-node tools/update-fixtures.ts",
-    "_version": "npm run -s build",
-    "_watch": "npm run -s test -- --watch-extensions .ts --watch --growl",
-    "build:dts": "dts-bundle --name regexpp2 --main ./src/index.d.ts --out ../index.d.ts",
+    "test": "nyc mocha --require ts-node/register \"test/*.ts\" --exclude \"**/*.d.ts\" --reporter dot --timeout 10000",
+    "update:ids": "npx ts-node scripts/update-unicode-ids.ts",
+    "update:test": "npx ts-node scripts/update-fixtures.ts",
+    "watch": "_mocha \"test/*.ts\" --exclude \"**/*.d.ts\" --require ts-node/register --reporter dot --timeout 10000 --watch-extensions .ts --watch --growl",
     "npm-publish": "npm publish",
-    "prepublishOnly": "npm run build:dts"
+    "prepublishOnly": "echo prepublishOnly"
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/mocha": "^5.2.5",
-    "@types/node": "^10.12.19",
-    "mocha": "^5.2.0"
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^12.0.0",
+    "mocha": "^6.1.4"
   },
   "peerDependencies": {
-    "dts-bundle": "^0.7.3"
+
   },
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=6.5.0"
   }
 }

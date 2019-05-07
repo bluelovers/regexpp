@@ -5,7 +5,7 @@ export declare type Node = BranchNode | LeafNode;
 /**
  * The type which includes all branch nodes.
  */
-export declare type BranchNode = RegExpLiteral | Pattern | Disjunction | Group | CapturingGroup | Quantifier | CharacterClass | LookaroundAssertion | CharacterClassRange;
+export declare type BranchNode = RegExpLiteral | Pattern | Alternative | Group | CapturingGroup | Quantifier | CharacterClass | LookaroundAssertion | CharacterClassRange;
 /**
  * The type which includes all leaf nodes.
  */
@@ -13,19 +13,15 @@ export declare type LeafNode = BoundaryAssertion | CharacterSet | Character | Ba
 /**
  * The type which includes all atom nodes.
  */
-export declare type Element = Disjunction | Group | CapturingGroup | Quantifier | CharacterClass | Assertion | CharacterSet | Character | Backreference;
+export declare type Element = Assertion | Quantifier | QuantifiableElement;
+/**
+ * The type which includes all atom nodes that Quantifier node can have as children.
+ */
+export declare type QuantifiableElement = Group | CapturingGroup | CharacterClass | CharacterSet | Character | Backreference | LookaheadAssertion;
 /**
  * The type which includes all character class atom nodes.
  */
 export declare type CharacterClassElement = EscapeCharacterSet | UnicodePropertyCharacterSet | Character | CharacterClassRange;
-/**
- * The type which includes all atom nodes that Alternative node can have as children.
- */
-export declare type AlternativeElement = Group | CapturingGroup | Quantifier | CharacterClass | Assertion | CharacterSet | Character | Backreference;
-/**
- * The type which includes all atom nodes that Quantifier node can have as children.
- */
-export declare type QuantifiableElement = Group | CapturingGroup | CharacterClass | LookaheadAssertion | CharacterSet | Character | Backreference;
 /**
  * The type which defines common properties for all node types.
  */
@@ -56,16 +52,16 @@ export interface RegExpLiteral extends NodeBase {
 export interface Pattern extends NodeBase {
     type: "Pattern";
     parent: RegExpLiteral | null;
-    elements: Element[];
+    alternatives: Alternative[];
 }
 /**
- * The disjunction.
+ * The alternative.
  * E.g. `a|b`
  */
-export interface Disjunction extends NodeBase {
-    type: "Disjunction";
+export interface Alternative extends NodeBase {
+    type: "Alternative";
     parent: Pattern | Group | CapturingGroup | LookaroundAssertion;
-    alternatives: AlternativeElement[][];
+    elements: Element[];
 }
 /**
  * The uncapturing group.
@@ -73,8 +69,8 @@ export interface Disjunction extends NodeBase {
  */
 export interface Group extends NodeBase {
     type: "Group";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | LookaroundAssertion;
-    elements: Element[];
+    parent: Alternative | Quantifier;
+    alternatives: Alternative[];
 }
 /**
  * The capturing group.
@@ -82,9 +78,9 @@ export interface Group extends NodeBase {
  */
 export interface CapturingGroup extends NodeBase {
     type: "CapturingGroup";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | LookaroundAssertion;
+    parent: Alternative | Quantifier;
     name: string | null;
-    elements: Element[];
+    alternatives: Alternative[];
     references: Backreference[];
 }
 /**
@@ -97,10 +93,10 @@ export declare type LookaroundAssertion = LookaheadAssertion | LookbehindAsserti
  */
 export interface LookaheadAssertion extends NodeBase {
     type: "Assertion";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | LookaroundAssertion;
+    parent: Alternative | Quantifier;
     kind: "lookahead";
     negate: boolean;
-    elements: Element[];
+    alternatives: Alternative[];
 }
 /**
  * The lookbehind assertion.
@@ -108,10 +104,10 @@ export interface LookaheadAssertion extends NodeBase {
  */
 export interface LookbehindAssertion extends NodeBase {
     type: "Assertion";
-    parent: Pattern | Disjunction | Group | CapturingGroup | LookaroundAssertion;
+    parent: Alternative;
     kind: "lookbehind";
     negate: boolean;
-    elements: Element[];
+    alternatives: Alternative[];
 }
 /**
  * The quantifier.
@@ -119,7 +115,7 @@ export interface LookbehindAssertion extends NodeBase {
  */
 export interface Quantifier extends NodeBase {
     type: "Quantifier";
-    parent: Pattern | Disjunction | Group | CapturingGroup | LookaroundAssertion;
+    parent: Alternative;
     min: number;
     max: number;
     greedy: boolean;
@@ -131,7 +127,7 @@ export interface Quantifier extends NodeBase {
  */
 export interface CharacterClass extends NodeBase {
     type: "CharacterClass";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | LookaroundAssertion;
+    parent: Alternative | Quantifier;
     negate: boolean;
     elements: CharacterClassElement[];
 }
@@ -159,7 +155,7 @@ export declare type BoundaryAssertion = EdgeAssertion | WordBoundaryAssertion;
  */
 export interface EdgeAssertion extends NodeBase {
     type: "Assertion";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | LookaroundAssertion;
+    parent: Alternative | Quantifier;
     kind: "start" | "end";
 }
 /**
@@ -168,7 +164,7 @@ export interface EdgeAssertion extends NodeBase {
  */
 export interface WordBoundaryAssertion extends NodeBase {
     type: "Assertion";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | LookaroundAssertion;
+    parent: Alternative | Quantifier;
     kind: "word";
     negate: boolean;
 }
@@ -182,7 +178,7 @@ export declare type CharacterSet = AnyCharacterSet | EscapeCharacterSet | Unicod
  */
 export interface AnyCharacterSet extends NodeBase {
     type: "CharacterSet";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | LookaroundAssertion;
+    parent: Alternative | Quantifier;
     kind: "any";
 }
 /**
@@ -191,7 +187,7 @@ export interface AnyCharacterSet extends NodeBase {
  */
 export interface EscapeCharacterSet extends NodeBase {
     type: "CharacterSet";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | CharacterClass | LookaroundAssertion;
+    parent: Alternative | Quantifier | CharacterClass;
     kind: "digit" | "space" | "word";
     negate: boolean;
 }
@@ -201,7 +197,7 @@ export interface EscapeCharacterSet extends NodeBase {
  */
 export interface UnicodePropertyCharacterSet extends NodeBase {
     type: "CharacterSet";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | CharacterClass | LookaroundAssertion;
+    parent: Alternative | Quantifier | CharacterClass;
     kind: "property";
     key: string;
     value: string | null;
@@ -214,7 +210,7 @@ export interface UnicodePropertyCharacterSet extends NodeBase {
  */
 export interface Character extends NodeBase {
     type: "Character";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | CharacterClass | LookaroundAssertion | CharacterClassRange;
+    parent: Alternative | Quantifier | CharacterClass | CharacterClassRange;
     value: number;
 }
 /**
@@ -223,7 +219,7 @@ export interface Character extends NodeBase {
  */
 export interface Backreference extends NodeBase {
     type: "Backreference";
-    parent: Pattern | Disjunction | Group | CapturingGroup | Quantifier | LookaroundAssertion;
+    parent: Alternative | Quantifier;
     ref: number | string;
     resolved: CapturingGroup;
 }

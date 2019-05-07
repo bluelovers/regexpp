@@ -36,3 +36,5 @@ export function visitRegExpAST(
 ): void {
     new RegExpVisitor(handlers).visit(node)
 }
+
+export default exports as typeof import('./index');

@@ -15,7 +15,7 @@ import {
 import { HyphenMinus } from "./unicode"
 import { RegExpValidator } from "./validator"
 
-type AppendableNode =
+export type AppendableNode =
     | Pattern
     | Alternative
     | Group
